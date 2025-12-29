@@ -15,6 +15,10 @@ func ReadInput(path string) []string {
 	return strings.Split(strings.TrimSpace(string(file)), "\n")
 }
 
+func CircularBuffer(current int, max int) int {
+	return ((current % max) + max) % max
+}
+
 func main() {
 	lines := ReadInput("inputs/input-1.txt")
 	result := 0
@@ -27,7 +31,7 @@ func main() {
 		if sign == 'L' {
 			cranks = cranks * -1
 		}
-		curr = ((curr+cranks)%100 + 100) % 100
+		curr = CircularBuffer(curr+cranks, 100)
 		if curr == 0 {
 			result += 1
 		}
