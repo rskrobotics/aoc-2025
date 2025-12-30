@@ -27,7 +27,7 @@ func main() {
 	for _, v := range lines {
 		fmt.Println(v)
 		sign := v[0]
-		cranks, _ := strconv.Atoi(string(v[1:]))
+		cranks, _ := strconv.Atoi(v[1:])
 		if sign == 'L' {
 			cranks = cranks * -1
 		}
