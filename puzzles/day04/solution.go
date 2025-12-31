@@ -6,6 +6,16 @@ import (
 	"strings"
 )
 
+func ReadInputs(path string) []string {
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	lines := strings.Split(strings.TrimSpace(string(bytes)), "\n")
+
+	return lines
+}
+
 type Grid struct {
 	data [][]rune
 	xlen int
@@ -52,12 +62,13 @@ func (g *Grid) CheckGrid() int {
 				if !ok {
 					continue
 				}
-				if n == '@' {
+				if n == '@' || c == 'R' {
 					monkeCount++
 				}
 
 			}
 			if monkeCount < 4 {
+				g.data[y][x] = 'R'
 				accessible++
 			}
 		}
@@ -65,20 +76,24 @@ func (g *Grid) CheckGrid() int {
 	return accessible
 }
 
-func ReadInputs(path string) []string {
-	bytes, err := os.ReadFile(path)
-	if err != nil {
-		panic(err)
+func (g *Grid) Remove() {
+	for y, line := range g.data {
+		for x := range line {
+			if g.data[y][x] == 'R' {
+				g.data[y][x] = '.'
+			}
+		}
 	}
-	lines := strings.Split(strings.TrimSpace(string(bytes)), "\n")
-
-	return lines
 }
 
 func main() {
 	lines := ReadInputs("inputs/input-4.txt")
 	grid := NewGrid(lines)
-	result := grid.CheckGrid()
+	removed := 0
+	for toRemove := grid.CheckGrid(); toRemove > 0; toRemove = grid.CheckGrid() {
+		removed += toRemove
+		grid.Remove()
+	}
 	fmt.Printf("Grid: %v\n", grid)
-	fmt.Printf("Result: %v\n", result)
+	fmt.Printf("Removed: %v\n", removed)
 }
