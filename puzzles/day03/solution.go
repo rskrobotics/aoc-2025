@@ -15,17 +15,22 @@ func ReadInput(path string) []string {
 }
 
 func MaxJolts(line string) int {
-	maxJolts := 0
-	tens := int(line[0] - '0')
-	for i := 1; i < len(line); i++ {
+	discardsLeft := len(line) - 12
+	stack := []int{}
+	for i := 0; i < len(line); i++ {
 		c := int(line[i] - '0')
-		if tens*10+c > maxJolts {
-			maxJolts = tens*10 + c
+		for len(stack) > 0 && discardsLeft > 0 && stack[len(stack)-1] < c {
+			stack = stack[:len(stack)-1]
+			discardsLeft--
 		}
-		if c > tens {
-			tens = c
-		}
+		stack = append(stack, c)
 	}
+	stack = stack[:12]
+	maxJolts := 0
+	for _, v := range stack {
+		maxJolts = maxJolts*10 + v
+	}
+
 	return maxJolts
 }
 
