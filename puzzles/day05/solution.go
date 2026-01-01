@@ -46,7 +46,7 @@ func mergeRanges(ranges []Range) []Range {
 	}
 	writeIdx := 0
 	for i := 1; i < len(ranges); i++ {
-		if ranges[i].start < ranges[writeIdx].end {
+		if ranges[i].start <= ranges[writeIdx].end {
 			if ranges[i].end > ranges[writeIdx].end {
 				ranges[writeIdx].end = ranges[i].end
 			}
@@ -58,6 +58,15 @@ func mergeRanges(ranges []Range) []Range {
 	return ranges[:writeIdx+1]
 }
 
+func rangesSummary(ranges []Range) int {
+	var allIDs int
+	for _, r := range ranges {
+		allIDs += r.end - r.start + 1
+	}
+
+	return allIDs
+}
+
 func main() {
 	ranges, IDs := ReadInputs("inputs/input-5.txt")
 	sort.Slice(ranges, func(i, j int) bool {
@@ -67,6 +76,7 @@ func main() {
 		return ranges[i].end < ranges[j].end
 	})
 	ranges = mergeRanges(ranges)
+	allIDs := rangesSummary(ranges)
 	freshIngredients := 0
 	for _, r := range ranges {
 		for _, id := range IDs {
@@ -77,6 +87,7 @@ func main() {
 		}
 	}
 
+	fmt.Printf("allIDs: %v\n", allIDs)
 	fmt.Printf("Fresh: %v\n", freshIngredients)
 	fmt.Printf("Ranges: %v\n", ranges)
 	fmt.Printf("Ids: %v\n", IDs)
