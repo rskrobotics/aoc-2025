@@ -25,37 +25,67 @@ func ReadInputs(path string) Grid {
 	return Grid{data: data}
 }
 
-func (g *Grid) countSplitters() int {
-	splitters := 0
+var memo = make(map[[2]int]int)
 
-	for y := 0; y < len(g.data); y++ {
-		for x := 0; x < len(g.data[y]); x++ {
-			r := g.data[y][x]
-			if r == 'S' {
-				g.data[y+1][x] = '|'
+func countTimelines(g *Grid, x, y int) int {
+	for {
+		y++
+		if y >= len(g.data) {
+			return 1
+		}
+		if g.data[y][x] == '^' {
+			key := [2]int{x, y}
+			if v, ok := memo[key]; ok {
+				return v
 			}
-			if y != len(g.data)-1 {
-				below := g.data[y+1][x]
-				if r == '|' {
-					switch below {
-					case '^':
-						g.data[y+1][x-1] = '|'
-						g.data[y+2][x+1] = '|'
-						splitters += 1
-					case '.':
-						g.data[y+1][x] = '|'
-					}
-				}
-			}
+			result := countTimelines(g, x-1, y) + countTimelines(g, x+1, y)
+			memo[key] = result
+			return result
 		}
 	}
-	return splitters
 }
+
+// func (g *Grid) countSplitters() int {
+// 	splitters := 0
+//
+// 	for y := 0; y < len(g.data); y++ {
+// 		for x := 0; x < len(g.data[y]); x++ {
+// 			r := g.data[y][x]
+// 			if r == 'S' {
+// 				g.data[y+1][x] = '|'
+// 			}
+// 			if y != len(g.data)-1 {
+// 				below := g.data[y+1][x]
+// 				if r == '|' {
+// 					switch below {
+// 					case '^':
+// 						g.data[y+1][x-1] = '|'
+// 						g.data[y+2][x+1] = '|'
+// 						splitters += 1
+// 					case '.':
+// 						g.data[y+1][x] = '|'
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return splitters
+// }
 
 func main() {
 	// g := ReadInputs("inputs/input-7-sample.txt")
 	g := ReadInputs("inputs/input-7.txt")
 	fmt.Printf("Grid: %v\n", g)
-	splitters := g.countSplitters()
-	fmt.Printf("Splitters : %v\n", splitters)
+	// splitters := g.countSplitters()
+	// fmt.Printf("Splitters : %v\n", splitters)
+
+	starter := 0
+	for idx, r := range g.data[0] {
+		if r == 'S' {
+			starter = idx
+		}
+	}
+	timelines := countTimelines(&g, starter, 0)
+
+	fmt.Printf("Timelines : %v\n", timelines)
 }
