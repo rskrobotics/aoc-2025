@@ -19,6 +19,29 @@ type Pair struct {
 	distance float64
 }
 
+func Part1(connectionsRequired int, pairs []Pair, parent map[int]int, boxes []Box) {
+	for i := range connectionsRequired {
+		if Find(pairs[i].a, parent) != Find(pairs[i].b, parent) {
+			Union(pairs[i].a, pairs[i].b, parent)
+		}
+	}
+	count := make(map[int]int)
+	for i := range boxes {
+		count[Find(i, parent)] += 1
+	}
+
+	values := make([]int, 0, len(count))
+	for _, v := range count {
+		values = append(values, v)
+	}
+	slices.Sort(values)
+	slices.Reverse(values)
+
+	top3 := values[:min(3, len(values))]
+	result := top3[0] * top3[1] * top3[2]
+	spew.Dump(result)
+}
+
 func Find(idx int, parent map[int]int) int {
 	if parent[idx] != idx {
 		return Find(parent[idx], parent)
@@ -57,7 +80,7 @@ func ReadInputs(path string) []Box {
 
 func main() {
 	boxes := ReadInputs("inputs/input-8.txt")
-	connectionsRequired := 1000
+	// connectionsRequired := 1000
 	pairs := []Pair{}
 
 	for i := 0; i < len(boxes)-1; i++ {
@@ -72,27 +95,16 @@ func main() {
 	for i := range boxes {
 		parent[i] = i
 	}
-	for i := range connectionsRequired {
+	// Part1(connectionsRequired, pairs, parent, boxes)
+	lastConnected := [2]int{}
+
+	for i := range pairs {
 		if Find(pairs[i].a, parent) != Find(pairs[i].b, parent) {
 			Union(pairs[i].a, pairs[i].b, parent)
+			lastConnected = [2]int{pairs[i].a, pairs[i].b}
 		}
 	}
-	count := make(map[int]int)
-	for i := range boxes {
-		count[Find(i, parent)] += 1
-	}
+	result := boxes[lastConnected[0]].x * boxes[lastConnected[1]].x
 
-	values := make([]int, 0, len(count))
-	for _, v := range count {
-		values = append(values, v)
-	}
-	slices.Sort(values)
-	slices.Reverse(values)
-
-	top3 := values[:min(3, len(values))]
-	result := top3[0] * top3[1] * top3[2]
-	// g := ReadInputs("inputs/input-8.txt")
-	// spew.Dump(boxes)
-	// spew.Dump(pairs)
 	spew.Dump(result)
 }
