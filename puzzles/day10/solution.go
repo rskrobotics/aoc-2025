@@ -9,8 +9,8 @@ import (
 )
 
 type Machine struct {
-	lights  []bool
-	buttons [][]bool
+	lights  int
+	buttons []int
 	jolts   []int
 }
 
@@ -32,12 +32,10 @@ func ReadInputs(path string) []Machine {
 		eButtons := sJolts - 2
 		sButtons := eLights + 2
 
-		lights := []bool{}
+		lights := 0
 		for i := sLights; i <= eLights; i++ {
 			if c := line[i]; c == '#' {
-				lights = append(lights, true)
-			} else {
-				lights = append(lights, false)
+				lights |= (1 << (i - sLights))
 			}
 		}
 
@@ -49,18 +47,18 @@ func ReadInputs(path string) []Machine {
 			jolts = append(jolts, vInt)
 		}
 
-		buttons := [][]bool{}
+		buttons := []int{}
 		buttonLine := line[sButtons : eButtons+1]
 
 		buttonVals := strings.FieldsSeq(buttonLine)
 		for v := range buttonVals {
-			combination := make([]bool, len(lights))
 			inner := v[1 : len(v)-1]
+			mask := 0
 			for v := range strings.SplitSeq(inner, ",") {
 				vInt, _ := strconv.Atoi(v)
-				combination[vInt] = true
+				mask |= (1 << vInt)
 			}
-			buttons = append(buttons, combination)
+			buttons = append(buttons, mask)
 		}
 
 		machines = append(machines, Machine{lights: lights, buttons: buttons, jolts: jolts})
@@ -70,7 +68,29 @@ func ReadInputs(path string) []Machine {
 }
 
 func main() {
-	machines := ReadInputs("inputs/input-10-sample.txt")
+	machines := ReadInputs("inputs/input-10.txt")
+	result := 0
 
-	spew.Dump(machines)
+	// spew.Dump(machines)
+	for _, m := range machines {
+		queue := [][2]int{{0, 0}}
+		visited := make(map[int]bool)
+		for len(queue) > 0 {
+			state, presses := queue[0][0], queue[0][1]
+			queue = queue[1:]
+			if state == m.lights {
+				result += presses
+				break
+			}
+			for _, b := range m.buttons {
+				newState := state ^ b
+				if !visited[newState] {
+					visited[newState] = true
+					queue = append(queue, [2]int{newState, presses + 1})
+				}
+
+			}
+		}
+	}
+	spew.Dump(result)
 }
