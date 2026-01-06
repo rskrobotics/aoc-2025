@@ -24,24 +24,65 @@ func ReadInputs(path string) map[string][]string {
 	return racks
 }
 
-func dfs(racks map[string][]string, state []string, ret int) int {
-	curr := state[len(state)-1]
+type Key struct {
+	curr  string
+	isDAC bool
+	isFFT bool
+}
+
+func dfs2(racks map[string][]string, curr string, isDAC, isFFT bool, memo map[Key]int) int {
 	if curr == "out" {
-		return ret + 1
+		if isDAC && isFFT {
+			return 1
+		}
+		return 0
+	}
+	if value, ok := memo[Key{curr, isDAC, isFFT}]; ok {
+		return value
 	}
 
-	choices := racks[curr]
-	for _, choice := range choices {
-		state = append(state, choice)
-		ret = dfs(racks, state, ret)
-		state = state[:len(state)-1]
+	count := 0
+	for _, c := range racks[curr] {
+		newDAC := isDAC || c == "dac"
+		newFFT := isFFT || c == "fft"
+		count += dfs2(racks, c, newDAC, newFFT, memo)
 	}
-	return ret
+	memo[Key{curr, isDAC, isFFT}] = count
+	return count
 }
+
+// func dfs(racks map[string][]string, state []string, ret int) int {
+// 	curr := state[len(state)-1]
+// 	if curr == "out" {
+// 		isDAC := false
+// 		isFFT := false
+// 		for _, v := range state {
+// 			if v == "dac" {
+// 				isDAC = true
+// 			}
+// 			if v == "fft" {
+// 				isFFT = true
+// 			}
+// 		}
+//
+// 		if isDAC && isFFT {
+// 			return ret + 1
+// 		}
+// 		return ret
+// 	}
+//
+// 	choices := racks[curr]
+// 	for _, choice := range choices {
+// 		state = append(state, choice)
+// 		ret = dfs(racks, state, ret)
+// 		state = state[:len(state)-1]
+// 	}
+// 	return ret
+// }
 
 func main() {
 	racks := ReadInputs("inputs/input-11.txt")
-	result := dfs(racks, []string{"you"}, 0)
+	result := dfs2(racks, "svr", false, false, make(map[Key]int))
 
 	spew.Dump(racks)
 	spew.Dump(result)
