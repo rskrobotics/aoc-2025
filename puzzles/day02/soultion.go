@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -30,19 +29,48 @@ func ReadInput(path string) []IDRange {
 	return r
 }
 
-func isDoubleNumber(i int) bool {
-	digits := 0
-	for t := i; t > 0; t /= 10 {
-		digits++
-	}
-	if digits%2 == 1 || digits == 0 {
+// func isDoubleNumber(i int) bool {
+// 	digits := 0
+// 	for t := i; t > 0; t /= 10 {
+// 		digits++
+// 	}
+// 	if digits%2 == 1 || digits == 0 {
+// 		return false
+// 	}
+// 	divisor := int(math.Pow10(digits / 2))
+// 	firstHalf := i / divisor
+// 	secondHalf := i % divisor
+//
+// 	return firstHalf == secondHalf
+// }
+
+func containsSequences(i int) bool {
+	if i < 10 {
 		return false
 	}
-	divisor := int(math.Pow10(digits / 2))
-	firstHalf := i / divisor
-	secondHalf := i % divisor
+	number := strconv.Itoa(i)
+	for seqLen := 1; seqLen <= len(number)/2; seqLen++ {
+		if len(number)%seqLen != 0 {
+			continue
+		}
 
-	return firstHalf == secondHalf
+		sequences := []string{}
+		for s := 0; s < len(number); s += seqLen {
+			sequences = append(sequences, number[s:s+seqLen])
+		}
+
+		allSame := true
+		for s := 0; s < len(sequences)-1; s++ {
+			if sequences[s] != sequences[s+1] {
+				allSame = false
+				break
+			}
+		}
+		if allSame {
+			return true
+		}
+	}
+	return false
 }
 
 func main() {
@@ -51,7 +79,7 @@ func main() {
 	fmt.Printf("Ranges %v\n", ranges)
 	for _, v := range ranges {
 		for i := v.s; i <= v.e; i++ {
-			if isDoubleNumber(i) {
+			if containsSequences(i) {
 				ret += i
 			}
 		}
