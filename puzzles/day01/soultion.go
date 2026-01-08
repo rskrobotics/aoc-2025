@@ -28,13 +28,16 @@ func main() {
 		fmt.Println(v)
 		sign := v[0]
 		cranks, _ := strconv.Atoi(v[1:])
+		fullRev := cranks / 100
+		cranks = cranks % 100
+		result += fullRev
 		if sign == 'L' {
 			cranks = cranks * -1
 		}
-		curr = CircularBuffer(curr+cranks, 100)
-		if curr == 0 {
+		if (cranks > 0 && curr+cranks >= 100) || (cranks < 0 && curr > 0 && curr+cranks <= 0) {
 			result += 1
 		}
+		curr = CircularBuffer(curr+cranks, 100)
 
 	}
 
